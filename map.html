@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karnataka Coastal Cities Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        #map { 
+            height: 100vh; 
+            width: 100%;
+        }
+        
+        .map-title {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        .map-title h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #0066cc;
+        }
+    </style>
+</head>
+<body>
+    <div class="map-title">
+        <h1>🗺️ Karnataka Coastal Cities</h1>
+    </div>
+    <div id="map"></div>
+    
+    <script>
+        // Initialize map centered on Karnataka coast
+        var map = L.map('map').setView([13.5, 74.8], 8);
+        
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 18
+        }).addTo(map);
+        
+        // City coordinates
+        const cities = [
+            { name: 'Mangalore', lat: 12.9141, lon: 74.8560, description: 'Major port city with pristine beaches' },
+            { name: 'Udupi', lat: 13.3409, lon: 74.7421, description: 'Famous for Krishna Temple and cuisine' },
+            { name: 'Gokarna', lat: 14.5479, lon: 74.3188, description: 'Sacred town with beautiful beaches' },
+            { name: 'Karwar', lat: 14.8134, lon: 74.1296, description: 'Scenic coastal town' },
+            { name: 'Murudeshwar', lat: 14.0942, lon: 74.4842, description: 'Home to giant Shiva statue' },
+            { name: 'Malpe', lat: 13.3500, lon: 74.7000, description: 'Natural port with St. Mary\'s Island' }
+        ];
+        
+        // Add markers for each city
+        cities.forEach(city => {
+            const marker = L.marker([city.lat, city.lon]).addTo(map);
+            
+            marker.bindPopup(`
+                <div style="text-align: center;">
+                    <h3 style="color: #0066cc; margin-bottom: 5px;">${city.name}</h3>
+                    <p style="margin: 5px 0;">${city.description}</p>
+                    <p style="margin: 5px 0; font-size: 0.9em; color: #666;">
+                        📍 ${city.lat.toFixed(4)}°N, ${city.lon.toFixed(4)}°E
+                    </p>
+                </div>
+            `);
+        });
+        
+        // Add a scale control
+        L.control.scale().addTo(map);
+    </script>
+</body>
+</html>

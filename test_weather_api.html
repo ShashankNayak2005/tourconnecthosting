@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #0066cc;
+        }
+        button {
+            background: #0066cc;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        button:hover {
+            background: #0052a3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #0066cc;
+        }
+        .success {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        .error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        .loading {
+            color: #666;
+            font-style: italic;
+        }
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌤️ Weather API Test</h1>
+        <p>This page tests the Open-Meteo API to verify it's working correctly.</p>
+        
+        <button onclick="testWeatherAPI()">🧪 Test Weather API</button>
+        <button onclick="testAllCities()">🌍 Test All Cities</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast';
+        
+        const cityCoordinates = {
+            'Mangalore': { lat: 12.9141, lon: 74.8560 },
+            'Udupi': { lat: 13.3409, lon: 74.7421 },
+            'Gokarna': { lat: 14.5479, lon: 74.3188 },
+            'Karwar': { lat: 14.8134, lon: 74.1296 },
+            'Murudeshwar': { lat: 14.0942, lon: 74.4842 },
+            'Malpe': { lat: 13.3500, lon: 74.7000 }
+        };
+
+        async function testWeatherAPI() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="result loading">⏳ Testing API for Mangalore...</div>';
+
+            try {
+                const coords = cityCoordinates['Mangalore'];
+                const url = `${WEATHER_API_URL}?latitude=${coords.lat}&longitude=${coords.lon}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m&timezone=Asia/Kolkata`;
+                
+                console.log('Fetching:', url);
+                
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const current = data.current;
+                
+                resultDiv.innerHTML = `
+                    <div class="result success">
+                        <h3>✅ API Test Successful!</h3>
+                        <p><strong>City:</strong> Mangalore</p>
+                        <p><strong>Temperature:</strong> ${Math.round(current.temperature_2m)}°C</p>
+                        <p><strong>Humidity:</strong> ${current.relative_humidity_2m}%</p>
+                        <p><strong>Wind Speed:</strong> ${Math.round(current.wind_speed_10m)} km/h</p>
+                        <p><strong>Precipitation:</strong> ${current.precipitation} mm</p>
+                        <p><strong>Weather Code:</strong> ${current.weather_code}</p>
+                        <p><strong>Time:</strong> ${current.time}</p>
+                        
+                        <h4>Raw API Response:</h4>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+                
+                console.log('✅ API Response:', data);
+                
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ API Test Failed</h3>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p><strong>Possible causes:</strong></p>
+                        <ul>
+                            <li>No internet connection</li>
+                            <li>API is temporarily down</li>
+                            <li>CORS issue (try opening from a web server)</li>
+                            <li>Firewall blocking the request</li>
+                        </ul>
+                    </div>
+                `;
+                
+                console.error('❌ API Error:', error);
+            }
+        }
+
+        async function testAllCities() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="result loading">⏳ Testing API for all 6 cities...</div>';
+
+            let results = '<div class="result success"><h3>🌍 Testing All Cities</h3>';
+            let successCount = 0;
+            let failCount = 0;
+
+            for (const [cityName, coords] of Object.entries(cityCoordinates)) {
+                try {
+                    const url = `${WEATHER_API_URL}?latitude=${coords.lat}&longitude=${coords.lon}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m&timezone=Asia/Kolkata`;
+                    
+                    const response = await fetch(url);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    const current = data.current;
+                    
+                    results += `
+                        <p>✅ <strong>${cityName}:</strong> ${Math.round(current.temperature_2m)}°C, 
+                        ${current.relative_humidity_2m}% humidity, 
+                        ${Math.round(current.wind_speed_10m)} km/h wind</p>
+                    `;
+                    
+                    successCount++;
+                    console.log(`✅ ${cityName}: ${Math.round(current.temperature_2m)}°C`);
+                    
+                } catch (error) {
+                    results += `<p>❌ <strong>${cityName}:</strong> Failed - ${error.message}</p>`;
+                    failCount++;
+                    console.error(`❌ ${cityName}: ${error.message}`);
+                }
+            }
+
+            results += `
+                <hr>
+                <p><strong>Summary:</strong> ${successCount} successful, ${failCount} failed</p>
+                ${successCount === 6 ? '<p style="color: green; font-weight: bold;">🎉 All cities working perfectly!</p>' : ''}
+                </div>
+            `;
+
+            resultDiv.innerHTML = results;
+        }
+
+        // Auto-test on page load
+        window.addEventListener('load', () => {
+            console.log('🌤️ Weather API Test Page Loaded');
+            console.log('Click "Test Weather API" to test a single city');
+            console.log('Click "Test All Cities" to test all 6 cities');
+        });
+    </script>
+</body>
+</html>

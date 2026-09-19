@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login Test - Browser</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        .test-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 10px 5px;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .log {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+        .log div {
+            margin: 5px 0;
+        }
+        .success { color: #00ff00; }
+        .error { color: #ff4444; }
+        .info { color: #4da6ff; }
+        .warning { color: #ffaa00; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🧪 Admin Login Test - Browser Version</h2>
+        
+        <div class="test-section">
+            <h3>Test Credentials</h3>
+            <p><strong>Email:</strong> admin@tourconnect.com</p>
+            <p><strong>Password:</strong> admin123</p>
+            <p><strong>Admin ID:</strong> ADMIN003</p>
+        </div>
+
+        <button onclick="testLogin()">🚀 Test Admin Login</button>
+        <button onclick="clearLog()">🗑️ Clear Log</button>
+
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = type;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        async function testLogin() {
+            clearLog();
+            log('🚀 Starting admin login test...', 'info');
+            
+            const credentials = {
+                username: 'admin@tourconnect.com',
+                password: 'admin123',
+                isAdmin: true,
+                adminId: 'admin@tourconnect.com'
+            };
+
+            log('📤 Sending request with:', 'info');
+            log(`   username: ${credentials.username}`, 'info');
+            log(`   password: ${credentials.password}`, 'info');
+            log(`   isAdmin: ${credentials.isAdmin}`, 'info');
+            log(`   adminId: ${credentials.adminId}`, 'info');
+            log('', 'info');
+
+            try {
+                log('🌐 Fetching http://localhost:3000/api/auth/login...', 'info');
+                
+                const response = await fetch('http://localhost:3000/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(credentials)
+                });
+
+                log(`📥 Response Status: ${response.status} ${response.statusText}`, 
+                    response.ok ? 'success' : 'error');
+                
+                const data = await response.json();
+                
+                log('📋 Response Data:', 'info');
+                log(JSON.stringify(data, null, 2), 'info');
+                log('', 'info');
+
+                if (response.ok) {
+                    log('✅ LOGIN SUCCESSFUL!', 'success');
+                    log('', 'success');
+                    log('👤 User Details:', 'success');
+                    log(`   Name: ${data.user.name}`, 'success');
+                    log(`   Email: ${data.user.email}`, 'success');
+                    log(`   Admin ID: ${data.user.adminId}`, 'success');
+                    log(`   Is Admin: ${data.user.isAdmin}`, 'success');
+                    log('', 'success');
+                    log(`🔑 Token: ${data.token.substring(0, 50)}...`, 'success');
+                    log('', 'success');
+                    log('✨ You can now use these credentials in the main app!', 'success');
+                } else {
+                    log('❌ LOGIN FAILED', 'error');
+                    log(`Error: ${data.message}`, 'error');
+                }
+
+            } catch (error) {
+                log('❌ CONNECTION ERROR', 'error');
+                log(`Error: ${error.message}`, 'error');
+                log('', 'error');
+                log('⚠️  Troubleshooting:', 'warning');
+                log('   1. Make sure server is running: node server.js', 'warning');
+                log('   2. Check if server is on http://localhost:3000', 'warning');
+                log('   3. Check browser console for CORS errors', 'warning');
+            }
+        }
+
+        // Auto-run test on page load
+        window.addEventListener('load', () => {
+            log('✅ Page loaded successfully', 'success');
+            log('Click "Test Admin Login" button to start test', 'info');
+            log('', 'info');
+        });
+    </script>
+</body>
+</html>
